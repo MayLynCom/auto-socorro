@@ -1,0 +1,20 @@
+{
+	"geolocation": {
+		"data": {
+			"city": "Santos",
+			"country": {
+				"code": "BR",
+				"name": "Brazil"
+			},
+			"subdivision": {
+				"code": "SP",
+				"name": "São Paulo"
+			},
+			"timezone": "America/Sao_Paulo",
+			"latitude": -23.9575,
+			"longitude": -46.2278,
+			"postalCode": "11400"
+		},
+		"timestamp": 1763562612818
+	}
+}
