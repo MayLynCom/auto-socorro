@@ -4,19 +4,22 @@ const errorBox = document.getElementById("cep-erro");
 const distanceSpan = document.getElementById("resultado-km");
 const priceSpan = document.getElementById("resultado-preco");
 const callButton = document.getElementById("btn-chamado");
-const sanitizeCep = (value = "") => value.replace(/\D/g, "");
 let lastResultData = null;
 updateCallButtonState();
+
+function isValidAddress(value) {
+  return typeof value === "string" && value.trim().length >= 5;
+}
 
 if (cepForm) {
   cepForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const cepVeiculo = sanitizeCep(document.getElementById("cep-veiculo")?.value || "");
-    const cepDestino = sanitizeCep(document.getElementById("cep-destino")?.value || "");
+    const enderecoVeiculo = (document.getElementById("endereco-veiculo")?.value || "").trim();
+    const enderecoDestino = (document.getElementById("endereco-destino")?.value || "").trim();
     const tipoVeiculo = document.querySelector('input[name="tipoVeiculo"]:checked')?.value;
 
-    if (cepVeiculo.length !== 8 || cepDestino.length !== 8 || !tipoVeiculo) {
-      showError("Informe dois CEPs validos (8 digitos) e escolha o tipo de veiculo.");
+    if (!isValidAddress(enderecoVeiculo) || !isValidAddress(enderecoDestino) || !tipoVeiculo) {
+      showError("Preencha os dois enderecos (rua + bairro + cidade) e escolha o tipo de veiculo.");
       return;
     }
 
@@ -27,8 +30,8 @@ if (cepForm) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          vehicleCep: cepVeiculo,
-          destinationCep: cepDestino,
+          vehicleAddress: enderecoVeiculo,
+          destinationAddress: enderecoDestino,
           vehicleType: tipoVeiculo,
         }),
       });
@@ -44,8 +47,8 @@ if (cepForm) {
       }
 
       lastResultData = {
-        vehicleCep: cepVeiculo,
-        destinationCep: cepDestino,
+        vehicleAddress: enderecoVeiculo,
+        destinationAddress: enderecoDestino,
         vehicleType: tipoVeiculo,
         distanceKm,
         price,
@@ -100,9 +103,7 @@ if (callButton) {
   callButton.addEventListener("click", () => {
     if (!lastResultData) return;
     const message = buildWhatsappMessage(lastResultData);
-    const url = `https://wa.me/5531990831992?text=${encodeURIComponent(
-      message
-    )}`;
+    const url = `https://wa.me/5531990831992?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
   });
 }
@@ -111,12 +112,9 @@ function buildWhatsappMessage(data) {
   const vehicleNames = {
     moto: "Moto",
     carro: "Carro de passeio",
-    utilitario: "Pick-up leve / furgão",
-    semipesado: "Veículo grande / comercial",
+    utilitario: "Pick-up leve / furgao",
+    semipesado: "Veiculo grande / comercial",
   };
-
-  const formatCep = (value) =>
-    value.slice(0, 5) + "-" + value.slice(5, 8);
 
   const priceFormatted = data.price.toLocaleString("pt-BR", {
     style: "currency",
@@ -126,10 +124,10 @@ function buildWhatsappMessage(data) {
 
   return (
     "*Chamado de Guincho*\n" +
-    `CEP do veículo: ${formatCep(data.vehicleCep)}\n` +
-    `CEP do destino: ${formatCep(data.destinationCep)}\n` +
-    `Tipo do veículo: ${vehicleNames[data.vehicleType] || data.vehicleType}\n` +
-    `Distância total: ${data.distanceKm.toFixed(2)} km\n` +
-    `Preço estimado: ${priceFormatted}`
+    `Endereco do veiculo: ${data.vehicleAddress}\n` +
+    `Endereco do destino: ${data.destinationAddress}\n` +
+    `Tipo do veiculo: ${vehicleNames[data.vehicleType] || data.vehicleType}\n` +
+    `Distancia total: ${data.distanceKm.toFixed(2)} km\n` +
+    `Preco estimado: ${priceFormatted}`
   );
 }

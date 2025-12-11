@@ -6699,8 +6699,8 @@ var require_lib3 = __commonJS({
 var fetch = require_lib3();
 var GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 var DISTANCE_API_URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
-var BASE_CEP = "31980540";
-var sanitizeCep = (value = "") => value.toString().replace(/\D/g, "");
+var BASE_ADDRESS = "31980540";
+var sanitizeAddress = (value = "") => value.toString().trim();
 exports.handler = async (event) => {
   if (!GOOGLE_API_KEY) {
     return respond(500, { error: "GOOGLE_API_KEY nao configurada." });
@@ -6711,18 +6711,18 @@ exports.handler = async (event) => {
   } catch (error) {
     return respond(400, { error: "Corpo da requisicao invalido." });
   }
-  const vehicleCep = sanitizeCep(body.vehicleCep);
-  const destinationCep = sanitizeCep(body.destinationCep);
+  const vehicleAddress = sanitizeAddress(body.vehicleAddress);
+  const destinationAddress = sanitizeAddress(body.destinationAddress);
   const vehicleType = (body.vehicleType || "carro").toString().toLowerCase();
-  if (vehicleCep.length !== 8 || destinationCep.length !== 8) {
+  if (vehicleAddress.length < 5 || destinationAddress.length < 5) {
     return respond(400, {
-      error: "Informe os dois CEPs para calcular a distancia."
+      error: "Informe os dois enderecos (rua + bairro + cidade) para calcular a distancia."
     });
   }
   const legs = [
-    { origins: BASE_CEP, destinations: vehicleCep },
-    { origins: vehicleCep, destinations: destinationCep },
-    { origins: destinationCep, destinations: BASE_CEP }
+    { origins: BASE_ADDRESS, destinations: vehicleAddress },
+    { origins: vehicleAddress, destinations: destinationAddress },
+    { origins: destinationAddress, destinations: BASE_ADDRESS }
   ];
   try {
     let totalKm = 0;
@@ -6768,9 +6768,9 @@ async function fetchDistanceInKm(origins, destinations) {
 function mapElementStatusToMessage(status) {
   switch (status) {
     case "NOT_FOUND":
-      return "CEP invalido ou nao encontrado.";
+      return "Endereco invalido ou nao encontrado.";
     case "ZERO_RESULTS":
-      return "Nenhuma rota foi encontrada entre os CEPs informados.";
+      return "Nenhuma rota foi encontrada entre os enderecos informados.";
     case "MAX_ROUTE_LENGTH_EXCEEDED":
       return "A distancia excede o limite permitido.";
     default:
