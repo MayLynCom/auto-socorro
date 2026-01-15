@@ -104,7 +104,7 @@ if (callButton) {
     if (!lastResultData) return;
     pushConversionData(lastResultData);
     const message = buildWhatsappMessage(lastResultData);
-    const url = `https://wa.me/5531990831992?text=${encodeURIComponent(message)}`;
+    const url = `https://wa.me/553188259694?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
   });
 }
